@@ -4,8 +4,16 @@ import com.project.uber.dto.DriverDto;
 import com.project.uber.dto.RideDto;
 import com.project.uber.dto.RideRequestDto;
 import com.project.uber.dto.RiderDto;
+import com.project.uber.entities.Driver;
 import com.project.uber.entities.RideRequest;
+import com.project.uber.entities.Rider;
+import com.project.uber.entities.User;
+import com.project.uber.entities.enums.RideRequestStatus;
+import com.project.uber.repositories.RideRequestRepository;
+import com.project.uber.repositories.RiderRepository;
 import com.project.uber.services.RiderService;
+import com.project.uber.strategies.DriverMatchingStrategy;
+import com.project.uber.strategies.RideFareCalculationStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -18,11 +26,31 @@ import java.util.List;
 @Slf4j
 public class RiderServiceImpl implements RiderService {
     private final ModelMapper modelMapper;
+    private final RideFareCalculationStrategy rideFareCalculationStrategy;
+    private final DriverMatchingStrategy driverMatchingStrategy;
+    private final RideRequestRepository rideRequestRepository;
+    private final RiderRepository riderRepository;
+
     @Override
     public RideRequestDto requestRide(RideRequestDto rideRequestDto) {
+        // Map the DTO to entity
         RideRequest rideRequest = modelMapper.map(rideRequestDto, RideRequest.class);
         log.info("checking the ride request object" + rideRequest.toString());
-        return  null;
+
+        // set ride request status to PENDING
+        rideRequest.setRideRequestStatus(RideRequestStatus.PENDING);
+
+        // calculate the fare
+        Double fare = rideFareCalculationStrategy.calculateFare(rideRequest);
+        rideRequest.setFare(fare);
+
+        // save the ride request
+        RideRequest savedRideRequest = rideRequestRepository.save(rideRequest);
+
+        // try to find the driver match
+        List<Driver> matchingDrivers = driverMatchingStrategy.findMatchingDrivers(rideRequest);
+
+        return  modelMapper.map(savedRideRequest, RideRequestDto.class);
     }
 
     @Override
@@ -43,5 +71,15 @@ public class RiderServiceImpl implements RiderService {
     @Override
     public List<RideDto> getAllMyRides() {
         return null;
+    }
+
+    @Override
+    public Rider createNewRider(User user) {
+        Rider rider = Rider
+                .builder()
+                .user(user)
+                .ratings(0.0)
+                .build();
+        return riderRepository.save(rider);
     }
 }
