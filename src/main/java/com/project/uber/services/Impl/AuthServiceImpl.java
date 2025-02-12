@@ -5,7 +5,6 @@ import com.project.uber.dto.SignUpDto;
 import com.project.uber.dto.UserDto;
 import com.project.uber.entities.Driver;
 import com.project.uber.entities.User;
-import com.project.uber.entities.enums.Role;
 import com.project.uber.exceptions.ResourceNotFoundException;
 import com.project.uber.exceptions.RuntimeConflictException;
 import com.project.uber.repositories.UserRepository;

@@ -1,11 +1,9 @@
 package com.project.uber.services.Impl;
 
-import com.project.uber.dto.WalletTransactionDto;
 import com.project.uber.entities.WalletTransaction;
 import com.project.uber.repositories.WalletTransactionRepository;
 import com.project.uber.services.WalletTransactionService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service

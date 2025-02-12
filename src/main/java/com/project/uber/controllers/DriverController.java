@@ -2,6 +2,7 @@ package com.project.uber.controllers;
 
 import com.project.uber.dto.*;
 import com.project.uber.services.DriverService;
+import com.project.uber.services.RatingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class DriverController {
 
     private final DriverService driverService;
+    private final RatingService ratingService;
 
     @PostMapping("/acceptRide/{rideRequestId}")
     public ResponseEntity<RideDto> acceptRide(@PathVariable Long rideRequestId){
@@ -47,4 +49,9 @@ public class DriverController {
         PageRequest pageRequest = PageRequest.of(pageOffset, pageSize, Sort.by(Sort.Direction.DESC, "createdAt", "id"));
         return ResponseEntity.ok(driverService.getAllMyRides(pageRequest));
     }
+
+//    @PostMapping("/rateRider/{rideId}/{rating}")
+//    private ResponseEntity<RiderDto> rateRider(@PathVariable Long rideId, @PathVariable Integer rating){
+//        return ResponseEntity.ok(driverService.rateRider(rideId, rating));
+//    }
 }

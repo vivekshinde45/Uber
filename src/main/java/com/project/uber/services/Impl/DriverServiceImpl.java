@@ -10,10 +10,7 @@ import com.project.uber.entities.enums.RideRequestStatus;
 import com.project.uber.entities.enums.RideStatus;
 import com.project.uber.exceptions.ResourceNotFoundException;
 import com.project.uber.repositories.DriverRepository;
-import com.project.uber.services.DriverService;
-import com.project.uber.services.PaymentService;
-import com.project.uber.services.RideRequestService;
-import com.project.uber.services.RideService;
+import com.project.uber.services.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -31,6 +28,7 @@ public class DriverServiceImpl implements DriverService {
     private final RideService rideService;
     private final ModelMapper modelMapper;
     private final PaymentService paymentService;
+    private final RatingService ratingService;
 
     @Override
     @Transactional
@@ -93,6 +91,8 @@ public class DriverServiceImpl implements DriverService {
 
         // create payment associated with this ride
         paymentService.createNewPayment(savedRide);
+        // create new rating for this ride
+        ratingService.createNewRating(savedRide);
 
         return modelMapper.map(savedRide, RideDto.class);
     }
@@ -125,7 +125,17 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public RiderDto rateRider(Long rideId, Integer rating) {
-        return null;
+        Ride ride = rideService.getRideById(rideId);
+        Driver currentDriver = getCurrentDriver();
+
+        if(!currentDriver.equals(ride.getDriver())){
+            throw new RuntimeException("Driver is not the owner of this ride");
+        }
+
+        if(!ride.getRideStatus().equals(RideStatus.ENDED)){
+            throw new RuntimeException("Ride status is not Ended hence the rating can not started, status: " + ride.getRideStatus());
+        }
+        return ratingService.rateRider(ride, rating);
     }
 
     @Override
